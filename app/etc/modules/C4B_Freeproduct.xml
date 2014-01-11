@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <C4B_Freeproduct>
+            <active>true</active>
+            <codePool>community</codePool>
+            <depends>
+                <Mage_Sales />    
+            </depends>            
+        </C4B_Freeproduct>
+    </modules>
+</config>
