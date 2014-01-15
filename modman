@@ -1,0 +1,7 @@
+app/code/community/C4B/Freeproduct/ app/code/community/C4B/Freeproduct/
+app/design/frontend/base/default/layout/freeproduct.xml app/design/frontend/base/default/layout/freeproduct.xml
+app/design/frontend/base/default/template/freeproduct/ app/design/frontend/base/default/template/freeproduct/
+app/etc/modules/C4B_Freeproduct.xml app/etc/modules/C4B_Freeproduct.xml
+app/locale/de_DE/C4B_Freeproduct.csv app/locale/de_DE/C4B_Freeproduct.csv
+app/locale/en_US/C4B_Freeproduct.csv app/locale/en_US/C4B_Freeproduct.csv
+
