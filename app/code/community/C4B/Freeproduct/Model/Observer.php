@@ -42,8 +42,8 @@ class C4B_Freeproduct_Model_Observer {
         $rule = $observer->getEvent()->getRule();
         
     	if ($rule->getSimpleAction() == C4B_Freeproduct_Model_Consts::ADD_GIFT_ACTION &&
-		    !$item->getIsFreeProduct()) {
-			self::_handleGift($quote, $item, $rule);
+            !$item->getIsFreeProduct()) {
+                self::_handleGift($quote, $item, $rule);
         }
     }
 
@@ -78,7 +78,7 @@ class C4B_Freeproduct_Model_Observer {
      * 
      * @param Mage_Sales_Model_Quote $quote
      * @param Mage_Sales_Model_Quote_Item $item
-     * @param Mage_Sales_Model_Quote_Item $rule
+     * @param Mage_SalesRule_Model_Rule $rule
      */   
     protected static function _handleGift(Mage_Sales_Model_Quote $quote,
                                           Mage_Sales_Model_Quote_Item $item,
@@ -89,8 +89,8 @@ class C4B_Freeproduct_Model_Observer {
     	
     	$qty = (integer) $rule->getDiscountAmount();
     	if ($qty) {
-    		$freeItem = self::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), $qty);
-    		self::_addAndApply($quote, $freeItem, $rule);
+    	    $freeItem = self::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), $qty);
+    	    self::_addAndApply($quote, $freeItem, $rule);
     	}
     }
 
