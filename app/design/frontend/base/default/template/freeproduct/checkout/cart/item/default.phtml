@@ -178,11 +178,11 @@ $canApplyMsrp = Mage::helper('catalog')->canApplyMsrp($_item->getProduct(), Mage
         <?php endif; ?>
     <?php endif; ?>
     <td class="a-center">
-    	<?php // THE NEXT 5 LINES ARE CHANGED BY C4B FOR FREEPRODUCT: The qty of Freeproducts is not editable ?>
-    	<?php if ($_item->getIsFreeProduct()) : ?>
-    		<?php echo $this->getQty() ?>
-    	<?php else: ?>
-        	<input name="cart[<?php echo $_item->getId() ?>][qty]" value="<?php echo $this->getQty() ?>" size="4" title="<?php echo $this->__('Qty') ?>" class="input-text qty" maxlength="12" />
+        <?php // THE NEXT 5 LINES ARE CHANGED BY C4B FOR FREEPRODUCT: The qty of Freeproducts is not editable ?>
+        <?php if ($_item->getIsFreeProduct()) : ?>
+            <?php echo $this->getQty() ?>
+        <?php else: ?>
+            <input name="cart[<?php echo $_item->getId() ?>][qty]" value="<?php echo $this->getQty() ?>" size="4" title="<?php echo $this->__('Qty') ?>" class="input-text qty" maxlength="12" />
         <?php endif; ?>
     </td>
     <?php if ($this->helper('tax')->displayCartPriceExclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
@@ -280,8 +280,8 @@ $canApplyMsrp = Mage::helper('catalog')->canApplyMsrp($_item->getProduct(), Mage
     <?php endif; ?>
     <?php // THE NEXT 5 LINES ARE CHANGED BY C4B FOR FREEPRODUCT: Freeproducts are not deletable ?>
     <td class="a-center">
-	    <?php if (!$_item->getIsFreeProduct()) : ?>    
-    		<a href="<?php echo $this->getDeleteUrl()?>" title="<?php echo $this->__('Remove item')?>" class="btn-remove btn-remove2"><?php echo $this->__('Remove item')?></a>
-	    <?php endif; ?>    	
+        <?php if (!$_item->getIsFreeProduct()) : ?>    
+            <a href="<?php echo $this->getDeleteUrl()?>" title="<?php echo $this->__('Remove item')?>" class="btn-remove btn-remove2"><?php echo $this->__('Remove item')?></a>
+        <?php endif; ?>        
     </td>
 </tr>
