@@ -156,7 +156,13 @@ class C4B_Freeproduct_Model_Observer
             'code' => 'info_buyRequest',
             'value' => serialize(array('qty' => $qty, 'is_free_product' => true))
         )));
-
+        // With the freeproduct_uniqid option, items of the same free product won't get combined.
+        $quoteItem->addOption(new Varien_Object(array(
+            'product' => $product,
+            'code' => 'freeproduct_uniqid',
+            'value' => uniqid(null, true)
+        )));
+        
         return $quoteItem;
     }
 
