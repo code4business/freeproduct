@@ -84,6 +84,22 @@
                     </freeproduct>
                 </observers>
             </sales_quote_collect_totals_before>
+            <catalog_product_type_prepare_full_options>
+                <observers>
+                    <freeproduct>
+                        <class>freeproduct/observer</class>
+                        <method>catalogProductTypePrepareFullOptions</method>
+                    </freeproduct>
+                </observers>
+            </catalog_product_type_prepare_full_options>
+            <sales_quote_product_add_after>
+                <observers>
+                    <freeproduct>
+                        <class>freeproduct/observer</class>
+                        <method>salesQuoteProductAddAfter</method>
+                    </freeproduct>
+                </observers>
+            </sales_quote_product_add_after>
         </events>
     </frontend>
 </config>
