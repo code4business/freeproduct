@@ -1,0 +1,15 @@
+{
+    "name": "c4b/freeproduct",
+    "type": "magento-module",
+    "description": "This extensions allows you to add gifts to your cart.",
+    "homepage": "https://github.com/code4business/freeproduct",
+    "require": {
+        "magento-hackathon/magento-composer-installer": "*"
+    },
+    "authors":[
+        {
+            "name":"Nikolai Krambrock",
+            "email":"freeproduct@code4business.de"
+        }
+    ]
+}
