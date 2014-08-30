@@ -77,6 +77,32 @@ class C4B_Freeproduct_Model_Observer
     }
 
     /**
+     * Detect free products based on buyRequest object and set it as temporary attribute to
+     * the product. Relevant for reordering. See also: salesQuoteProductAddAfter()
+     *
+     * @param Varien_Event_Observer $observer
+     */
+    public function catalogProductTypePrepareFullOptions(Varien_Event_Observer $observer)
+    {
+        if ($observer->getBuyRequest()->getData('is_free_product')) {
+            $observer->getProduct()->setIsFreeProduct(true);
+        }
+    }
+
+    /**
+     * Adds is_free_product attribute to quote model if set to product. Relevant for reordering.
+     * See also: catalogProductTypePrepareFullOptions()
+     *
+     * @param Varien_Event_Observer $observer
+     */
+    public function salesQuoteProductAddAfter(Varien_Event_Observer $observer)
+    {
+    	foreach ($observer->getEvent()->getItems() as $quoteItem) {
+    		$quoteItem->setIsFreeProduct($quoteItem->getProduct()->getIsFreeProduct());
+    	}
+    }
+    
+    /**
      * Make sure that a gift is only added once, create a free item and add it to the cart.
      *
      * @param Mage_Sales_Model_Quote $quote
@@ -100,7 +126,8 @@ class C4B_Freeproduct_Model_Observer
 
     /**
      * Create a free item. It has a value of 0$ in the cart no matter what the price was
-     * originally.
+     * originally. The flag is_free_product gets saved in the buy request to read it on
+     * reordering, because fieldset conversion does not work from order item to quote item.
      *
      * @param Mage_Sales_Model_Quote $quote
      * @param string $sku
@@ -124,7 +151,18 @@ class C4B_Freeproduct_Model_Observer
                 ->setIsFreeProduct(true)
                 ->setWeeeTaxApplied('a:0:{}') // Set WeeTaxApplied Value by default so there are no "warnings" later on during invoice creation
                 ->setStoreId($storeId);
-
+        $quoteItem->addOption(new Varien_Object(array(
+            'product' => $product,
+            'code' => 'info_buyRequest',
+            'value' => serialize(array('qty' => $qty, 'is_free_product' => true))
+        )));
+        // With the freeproduct_uniqid option, items of the same free product won't get combined.
+        $quoteItem->addOption(new Varien_Object(array(
+            'product' => $product,
+            'code' => 'freeproduct_uniqid',
+            'value' => uniqid(null, true)
+        )));
+        
         return $quoteItem;
     }
 
