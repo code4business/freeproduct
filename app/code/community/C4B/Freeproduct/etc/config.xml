@@ -45,7 +45,16 @@
                         <method>adminhtmlBlockSalesruleActionsPrepareform</method>
                     </freeproduct>
                 </observers>
-               </adminhtml_block_salesrule_actions_prepareform>
+            </adminhtml_block_salesrule_actions_prepareform>
+            <adminhtml_controller_salesrule_prepare_save>
+                <observers>
+                    <freeproduct>
+                        <type>model</type>
+                        <class>freeproduct/observer</class>
+                        <method>adminhtmlControllerSalesrulePrepareSave</method>
+                    </freeproduct>
+                </observers>
+            </adminhtml_controller_salesrule_prepare_save>
         </events>
         <translate>
             <modules>
