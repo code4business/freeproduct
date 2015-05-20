@@ -171,7 +171,7 @@ class C4B_Freeproduct_Model_Observer
      *
      * @param Mage_Sales_Model_Quote $quote
      * @param Mage_Sales_Model_Quote_Item $item
-     * @param Mage_Sales_Model_Quote_Item $rule
+     * @param Mage_SalesRule_Model_Rule $rule
      */
     protected static function _addAndApply(Mage_Sales_Model_Quote $quote,
         Mage_Sales_Model_Quote_Item $item,
