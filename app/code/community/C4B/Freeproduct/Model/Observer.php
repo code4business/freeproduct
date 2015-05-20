@@ -77,6 +77,28 @@ class C4B_Freeproduct_Model_Observer
     }
 
     /**
+     * Check if the given free product SKU is not empty and references a valid product.
+     *
+     * @param Varien_Event_Observer $observer
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function adminhtmlControllerSalesrulePrepareSave($observer)
+    {
+        $request = $observer->getRequest();
+        if ($request->getParam('simple_action') == C4B_Freeproduct_Model_Consts::ADD_GIFT_ACTION) {
+            $giftSku = $request->getParam('gift_sku');
+            if (empty($giftSku) || Mage::getModel('catalog/product')->getIdBySku($giftSku) == false) {
+                // make sure that unsaved data is not lost
+                $data = $request->getPost();
+                Mage::getSingleton('adminhtml/session')->setPageData($data);
+                // just throw an exception, Mage_Adminhtml_Promo_QuoteController::saveAction will do the rest
+                throw new Mage_Core_Exception('The free product SKU must be a valid product.');
+            }
+        }
+    }
+
+    /**
      * Detect free products based on buyRequest object and set it as temporary attribute to
      * the product. Relevant for reordering. See also: salesQuoteProductAddAfter()
      *
