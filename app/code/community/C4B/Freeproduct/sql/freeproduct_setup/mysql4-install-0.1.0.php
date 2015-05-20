@@ -10,7 +10,7 @@
  * @package      C4B_Freeproduct
  * @author       Nikolai Krambrock <freeproduct@code4business.de>
  * @copyright    code4business Software GmbH
- * @version      0.1.0
+ * @version      1.0.0
  */
 
 /**
