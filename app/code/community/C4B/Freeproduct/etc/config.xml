@@ -2,7 +2,7 @@
 <config>
     <modules>
         <C4B_Freeproduct>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </C4B_Freeproduct>
     </modules>
     <global>
@@ -84,7 +84,7 @@
                     </freeproduct>
                 </observers>
             </salesrule_validator_process>
-            <sales_quote_collect_totals_before>
+            <sales_quote_load_after>
                 <observers>
                     <freeproduct>
                         <type>model</type>
@@ -92,7 +92,7 @@
                         <method>salesQuoteCollectTotalsBefore</method>
                     </freeproduct>
                 </observers>
-            </sales_quote_collect_totals_before>
+            </sales_quote_load_after>
             <catalog_product_type_prepare_full_options>
                 <observers>
                     <freeproduct>
