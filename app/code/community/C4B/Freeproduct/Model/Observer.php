@@ -101,7 +101,6 @@ class C4B_Freeproduct_Model_Observer
     		$quoteItem->setIsFreeProduct($quoteItem->getProduct()->getIsFreeProduct());
     	}
     }
-    
     /**
      * Make sure that a gift is only added once, create a free item and add it to the cart.
      *
@@ -109,7 +108,7 @@ class C4B_Freeproduct_Model_Observer
      * @param Mage_Sales_Model_Quote_Item $item
      * @param Mage_SalesRule_Model_Rule $rule
      */
-    protected static function _handleGift(Mage_Sales_Model_Quote $quote, 
+    protected static function _handleGift(Mage_Sales_Model_Quote $quote,
         Mage_Sales_Model_Quote_Item $item,
         Mage_SalesRule_Model_Rule $rule
     ) {
@@ -119,8 +118,11 @@ class C4B_Freeproduct_Model_Observer
 
         $qty = (integer) $rule->getDiscountAmount();
         if ($qty) {
-            $freeItem = self::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), $qty);
-            self::_addAndApply($quote, $freeItem, $rule);
+            $freeSkus = array_map('trim', explode(',', $rule->getGiftSku()));
+            foreach ($freeSkus as $freeSku) {
+                $freeItem = self::_getFreeQuoteItem($quote, $freeSku, $item->getStoreId(), $qty);
+                self::_addAndApply($quote, $freeItem, $rule);
+            }
         }
     }
 
