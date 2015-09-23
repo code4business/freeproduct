@@ -9,7 +9,7 @@ I am very happy for people contributing with pull requests. If possible stick to
 - Keep your code as simple and as short as possible
 - Use speaking method and variable names - this is a very important (or the primary) source of documentation
 - Use observers instead of rewrites wherever possible
-- Do not duplicate code; so if you copy code from one place to another you are properly doing something wrong
+- Do not duplicate code; so if you copy code from one place to another you are probably doing something wrong
 - Only use comments inside methods if the code is really hard to understand and you cannot make it easier; please comment the methods however
 - Use sentences for your commit-messages that start with a verb in past tense and end with a dot, e.g. "Add modman file."
 
