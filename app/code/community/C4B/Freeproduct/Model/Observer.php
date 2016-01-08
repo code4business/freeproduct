@@ -155,12 +155,12 @@ class C4B_Freeproduct_Model_Observer
      * @param string $sku
      * @param int $storeId
      * @param int $qty
-     * @return Mage_Sales_Quote_Item
+     * @return Mage_Sales_Quote_Item|bool
      */
     protected static function _getFreeQuoteItem(Mage_Sales_Model_Quote $quote, $sku, $storeId, $qty)
     {
         if ($qty < 1) {
-            return;
+            return false;
         }
 
         $product = Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
