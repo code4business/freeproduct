@@ -4,4 +4,7 @@ app/design/frontend/base/default/template/freeproduct/ app/design/frontend/base/
 app/etc/modules/C4B_Freeproduct.xml app/etc/modules/C4B_Freeproduct.xml
 app/locale/de_DE/C4B_Freeproduct.csv app/locale/de_DE/C4B_Freeproduct.csv
 app/locale/en_US/C4B_Freeproduct.csv app/locale/en_US/C4B_Freeproduct.csv
-
+app/locale/es_ES/C4B_Freeproduct.csv app/locale/es_ES/C4B_Freeproduct.csv
+app/locale/fr_FR/C4B_Freeproduct.csv app/locale/fr_FR/C4B_Freeproduct.csv
+app/locale/nl_NL/C4B_Freeproduct.csv app/locale/nl_NL/C4B_Freeproduct.csv
+app/locale/pt_PT/C4B_Freeproduct.csv app/locale/pt_PT/C4B_Freeproduct.csv

@@ -11,5 +11,28 @@
             "name":"Nikolai Krambrock",
             "email":"freeproduct@code4business.de"
         }
+    ],
+  "extra": {
+    "magento-root-dir": "./",
+    "magento-deploystrategy": "copy",
+    "map": [
+      ["./app/code/community/C4B/Freeproduct", "./app/code/community/C4B/Freeproduct"],
+      ["./app/etc/modules/C4B/Freeproduct.xml", "./app/etc/modules/C4B/Freeproduct.xml"],
+      ["./app/design/frontend/base/default/layout/freeproduct.xml", "./app/design/frontend/base/default/layout/freeproduct.xml"],
+      ["./app/design/frontend/base/default/template/freeproduct/etc/config.xml", "./app/design/frontend/base/default/template/freeproduct/etc/config.xml"],
+      ["./app/design/frontend/base/default/template/freeproduct/sql/freeproduct_setup/mysql4-install-0.1.0.php", "./app/design/frontend/base/default/template/freeproduct/sql/freeproduct_setup/mysql4-install-0.1.0.php"],
+      ["./app/design/frontend/base/default/template/freeproduct/Helper/Data.php", "./app/design/frontend/base/default/template/freeproduct/Helper/Data.php"],
+      ["./app/design/frontend/base/default/template/freeproduct/Model/Consts.php", "./app/design/frontend/base/default/template/freeproduct/Model/Consts.php"],
+      ["./app/design/frontend/base/default/template/freeproduct/Model/Observer.php", "./app/design/frontend/base/default/template/freeproduct/Model/Observer.php"],
+      ["./app/locale/de_DE/C4B_Freeproduct.csv", "./app/locale/de_DE/C4B_Freeproduct.csv"],
+      ["./app/locale/en_US/C4B_Freeproduct.csv", "./app/locale/en_US/C4B_Freeproduct.csv"],
+      ["./app/locale/es_ES/C4B_Freeproduct.csv", "./app/locale/es_ES/C4B_Freeproduct.csv"],
+      ["./app/locale/fr_FR/C4B_Freeproduct.csv", "./app/locale/fr_FR/C4B_Freeproduct.csv"],
+      ["./app/locale/nl_NL/C4B_Freeproduct.csv", "./app/locale/nl_NL/C4B_Freeproduct.csv"],
+      ["./app/locale/pt_PT/C4B_Freeproduct.csv", "./app/locale/pt_PT/C4B_Freeproduct.csv"]
     ]
+  },
+  "config": {
+    "preferred-install": "dist"
+  }
 }
