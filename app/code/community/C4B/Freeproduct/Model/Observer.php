@@ -139,10 +139,16 @@ class C4B_Freeproduct_Model_Observer
             return;
         }
 
-        $qty = (integer) $rule->getDiscountAmount();
-        if ($qty) {
-            $freeItem = self::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), $qty);
+        $freeItem = self::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), (int)$rule->getDiscountAmount());
+        if ($freeItem) {
             self::_addAndApply($quote, $freeItem, $rule);
+        } else {
+            Mage::log(
+                sprintf(
+                    'C4B_Freeproduct: Gift product not saleable. Rule ID: %d, Gift SKU: %s, Store ID: %d',
+                    $rule->getId(), $rule->getGiftSku(), $quote->getStoreId()
+                ), Zend_Log::ERR
+            );
         }
     }
 
@@ -155,7 +161,7 @@ class C4B_Freeproduct_Model_Observer
      * @param string $sku
      * @param int $storeId
      * @param int $qty
-     * @return Mage_Sales_Quote_Item|bool
+     * @return Mage_Sales_Model_Quote_Item|bool
      */
     protected static function _getFreeQuoteItem(Mage_Sales_Model_Quote $quote, $sku, $storeId, $qty)
     {
@@ -163,8 +169,14 @@ class C4B_Freeproduct_Model_Observer
             return false;
         }
 
+        /** @var Mage_Catalog_Model_Product $product */
         $product = Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
         Mage::getModel('cataloginventory/stock_item')->assignProduct($product);
+
+        if ($product->isSalable() == false) {
+            return false;
+        }
+
         $quoteItem = Mage::getModel('sales/quote_item')->setProduct($product);
         $quoteItem->setQuote($quote)
                 ->setQty($qty)
