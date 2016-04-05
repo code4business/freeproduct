@@ -15,13 +15,4 @@
  */
 class C4B_Freeproduct_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    /**
-     * This logs a message in a custom log file.
-     *
-     * @param string $msg
-     */
-    public function log($msg)
-    {
-        Mage::log($msg, Zend_Log::INFO, 'freeproduct.log');
-    }
 }
