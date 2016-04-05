@@ -211,10 +211,34 @@ class C4B_Freeproduct_Model_Observer
      */
     protected static function _resetFreeItems(Mage_Sales_Model_Quote $quote)
     {
+        /**
+         * The quote store is set to current store temporarily because of a possible problem in Enterprise v1.14.2.4.
+         * If the following conditions are true:
+         * - Multiple stores
+         * - The store is being switched from A to B
+         * - the product flat index is not set as build (see table core_flag) in store A but it is in store B (or vice-versa)
+         *
+         * When the quote_item collection is loaded, products are assigned to it. When the collection is instantiated, either flat
+         * or EAV resource is set based on availability of the index per store. Here, the current store is being used to determine
+         * flat availability. The Flat/EAV resource models are not interface-compatible, once it is set it should not change
+         * otherwise there will be missing methods which cause fatal errors.
+         * After instantiation, the store of the quote is being set which might have different flat availability and the collection
+         * model will try to use the wrong resource model which will result in fatal errors.
+         *
+         * @see Flat and EAV product resource models are not interface compatible
+         * @see Mage_Sales_Model_Resource_Quote_Item_Collection::_assignProducts()
+         * @see Mage_Catalog_Model_Resource_Product_Collection:::_construct()
+         * @see Mage_Catalog_Model_Resource_Product_Collection::isEnabledFlat()
+         */
+        $originalStore = $quote->getStoreId();
+        $quote->setStoreId(Mage::app()->getStore()->getId());
+
         foreach ($quote->getAllItems() as $item) {
             if ($item->getIsFreeProduct()) {
                 $quote->removeItem($item->getId());
             }
         }
+
+        $quote->setStoreId($originalStore);
     }
 }
