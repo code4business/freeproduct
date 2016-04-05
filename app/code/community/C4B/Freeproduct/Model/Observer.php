@@ -25,7 +25,37 @@ class C4B_Freeproduct_Model_Observer
      */
     public function salesQuoteCollectTotalsBefore(Varien_Event_Observer $observer)
     {
-        self::_resetFreeItems($observer->getEvent()->getQuote());
+        /** @var Mage_Sales_Model_Quote $quote */
+        $quote = $observer->getEvent()->getQuote();
+        /**
+         * The quote store is set to current store temporarily because of a possible problem in Enterprise v1.14.2.4.
+         * If the following conditions are true:
+         * - Multiple stores
+         * - The store is being switched from A to B
+         * - the product flat index is not set as build (see table core_flag) in store A but it is in store B (or vice-versa)
+         *
+         * When the quote_item collection is loaded, products are assigned to it. When the collection is instantiated, either flat
+         * or EAV resource is set based on availability of the index per store. Here, the current store is being used to determine
+         * flat availability. The Flat/EAV resource models are not interface-compatible, once it is set it should not change
+         * otherwise there will be missing methods which cause fatal errors.
+         * After instantiation, the store of the quote is being set which might have different flat availability and the collection
+         * model will try to use the wrong resource model which will result in fatal errors.
+         *
+         * @see Flat and EAV product resource models are not interface compatible
+         * @see Mage_Sales_Model_Resource_Quote_Item_Collection::_assignProducts()
+         * @see Mage_Catalog_Model_Resource_Product_Collection:::_construct()
+         * @see Mage_Catalog_Model_Resource_Product_Collection::isEnabledFlat()
+         */
+        $originalStore = $quote->getStoreId();
+        $quote->setStoreId(Mage::app()->getStore()->getId());
+
+        foreach ($quote->getAllItems() as $item) {
+            if ($item->getIsFreeProduct()) {
+                $quote->removeItem($item->getId());
+            }
+        }
+
+        $quote->setStoreId($originalStore);
     }
 
     /**
@@ -44,8 +74,29 @@ class C4B_Freeproduct_Model_Observer
         /* @var $rule Mage_SalesRule_Model_Rule */
         $rule = $observer->getEvent()->getRule();
 
-        if ($rule->getSimpleAction() == C4B_Freeproduct_Model_Consts::ADD_GIFT_ACTION && !$item->getIsFreeProduct()) {
-            self::_handleGift($quote, $item, $rule);
+        if ($rule->getSimpleAction() != C4B_Freeproduct_Model_Consts::ADD_GIFT_ACTION
+            || $item->getIsFreeProduct()
+            || $rule->getIsApplied())
+        {
+            return;
+        }
+
+        /** @var Mage_Sales_Model_Quote_Item $freeItem */
+        $freeItem = static::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), (int)$rule->getDiscountAmount());
+        if ($freeItem)
+        {
+            $quote->addItem($freeItem);
+            $freeItem->setApplyingRule($rule);
+            $rule->setIsApplied(true);
+        }
+        else
+        {
+            Mage::log(
+                sprintf(
+                    'C4B_Freeproduct: Gift product not saleable. Rule ID: %d, Gift SKU: %s, Store ID: %d',
+                    $rule->getId(), $rule->getGiftSku(), $quote->getStoreId()
+                ), Zend_Log::ERR
+            );
         }
     }
 
@@ -123,34 +174,6 @@ class C4B_Freeproduct_Model_Observer
     		$quoteItem->setIsFreeProduct($quoteItem->getProduct()->getIsFreeProduct());
     	}
     }
-    
-    /**
-     * Make sure that a gift is only added once, create a free item and add it to the cart.
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     * @param Mage_Sales_Model_Quote_Item $item
-     * @param Mage_SalesRule_Model_Rule $rule
-     */
-    protected static function _handleGift(Mage_Sales_Model_Quote $quote, 
-        Mage_Sales_Model_Quote_Item $item,
-        Mage_SalesRule_Model_Rule $rule
-    ) {
-        if ($rule->getIsApplied()) {
-            return;
-        }
-
-        $freeItem = self::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), (int)$rule->getDiscountAmount());
-        if ($freeItem) {
-            self::_addAndApply($quote, $freeItem, $rule);
-        } else {
-            Mage::log(
-                sprintf(
-                    'C4B_Freeproduct: Gift product not saleable. Rule ID: %d, Gift SKU: %s, Store ID: %d',
-                    $rule->getId(), $rule->getGiftSku(), $quote->getStoreId()
-                ), Zend_Log::ERR
-            );
-        }
-    }
 
     /**
      * Create a free item. It has a value of 0$ in the cart no matter what the price was
@@ -198,59 +221,5 @@ class C4B_Freeproduct_Model_Observer
         )));
         
         return $quoteItem;
-    }
-
-    /**
-     * Add a free item and mark that the rule was used on this item.
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     * @param Mage_Sales_Model_Quote_Item $item
-     * @param Mage_SalesRule_Model_Rule $rule
-     */
-    protected static function _addAndApply(Mage_Sales_Model_Quote $quote,
-        Mage_Sales_Model_Quote_Item $item,
-        Mage_SalesRule_Model_Rule $rule
-    ) {
-        $quote->addItem($item);
-        $item->setApplyingRule($rule);
-        $rule->setIsApplied(true);
-    }
-
-    /**
-     * Delete all free items from the cart.
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     */
-    protected static function _resetFreeItems(Mage_Sales_Model_Quote $quote)
-    {
-        /**
-         * The quote store is set to current store temporarily because of a possible problem in Enterprise v1.14.2.4.
-         * If the following conditions are true:
-         * - Multiple stores
-         * - The store is being switched from A to B
-         * - the product flat index is not set as build (see table core_flag) in store A but it is in store B (or vice-versa)
-         *
-         * When the quote_item collection is loaded, products are assigned to it. When the collection is instantiated, either flat
-         * or EAV resource is set based on availability of the index per store. Here, the current store is being used to determine
-         * flat availability. The Flat/EAV resource models are not interface-compatible, once it is set it should not change
-         * otherwise there will be missing methods which cause fatal errors.
-         * After instantiation, the store of the quote is being set which might have different flat availability and the collection
-         * model will try to use the wrong resource model which will result in fatal errors.
-         *
-         * @see Flat and EAV product resource models are not interface compatible
-         * @see Mage_Sales_Model_Resource_Quote_Item_Collection::_assignProducts()
-         * @see Mage_Catalog_Model_Resource_Product_Collection:::_construct()
-         * @see Mage_Catalog_Model_Resource_Product_Collection::isEnabledFlat()
-         */
-        $originalStore = $quote->getStoreId();
-        $quote->setStoreId(Mage::app()->getStore()->getId());
-
-        foreach ($quote->getAllItems() as $item) {
-            if ($item->getIsFreeProduct()) {
-                $quote->removeItem($item->getId());
-            }
-        }
-
-        $quote->setStoreId($originalStore);
     }
 }
