@@ -194,6 +194,11 @@ class C4B_Freeproduct_Model_Observer
 
         /** @var Mage_Catalog_Model_Product $product */
         $product = Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
+
+        if ($product == false) {
+            return false;
+        }
+
         Mage::getModel('cataloginventory/stock_item')->assignProduct($product);
 
         if ($product->isSalable() == false) {
