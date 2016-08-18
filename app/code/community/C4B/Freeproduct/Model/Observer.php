@@ -15,6 +15,14 @@
  */
 class C4B_Freeproduct_Model_Observer
 {
+    /**
+     * @param $giftSku
+     * @return string[]
+     */
+    protected static function _getSkuList($giftSku)
+    {
+        return array_map('trim', explode(',', $giftSku));
+    }
 
     /**
      * Delete all free products that have been added through this module before.
@@ -82,13 +90,15 @@ class C4B_Freeproduct_Model_Observer
         }
 
         try {
-            /** @var Mage_Sales_Model_Quote_Item $freeItem */
-            $sku = $rule->getGiftSku();
             $qty = (int)$rule->getDiscountAmount();
-            $freeItem = static::_getFreeQuoteItem($rule->getId(), $sku, $item->getStoreId(), $qty);
-            $quote->addItem($freeItem);
-            $freeItem->setApplyingRule($rule);
-            $rule->setIsApplied(true);
+            $skus = static::_getSkuList($rule->getGiftSku());
+            foreach ($skus as $sku) {
+                /** @var Mage_Sales_Model_Quote_Item $freeItem */
+                $freeItem = static::_getFreeQuoteItem($rule->getId(), $sku, $item->getStoreId(), $qty);
+                $quote->addItem($freeItem);
+                $freeItem->setApplyingRule($rule);
+            }
+            $rule->setData('is_applied', true);
         } catch (RuntimeException $e) {
             Mage::logException($e);
         }
@@ -117,7 +127,7 @@ class C4B_Freeproduct_Model_Observer
             'name' => 'gift_sku',
             'label' => Mage::helper('freeproduct')->__('Gift SKU'),
             'title' => Mage::helper('freeproduct')->__('Gift SKU'),
-            'note' => Mage::helper('freeproduct')->__('Enter the SKU of the gift that should be added to the cart'),
+            'note' => Mage::helper('freeproduct')->__('Enter the SKU of the gift that should be added to the cart. You can enter a comma separated list for multiple gifts.'),
         ));
     }
 
@@ -133,7 +143,7 @@ class C4B_Freeproduct_Model_Observer
         $request = $observer->getRequest();
         if ($request->getParam('simple_action') == C4B_Freeproduct_Model_Consts::ADD_GIFT_ACTION) {
             $giftSku = $request->getParam('gift_sku');
-            if (empty($giftSku) || Mage::getModel('catalog/product')->getIdBySku($giftSku) == false) {
+            if (! static::_isValidGiftSku($giftSku)) {
                 // make sure that unsaved data is not lost
                 $data = $request->getPost();
                 Mage::getSingleton('adminhtml/session')->setPageData($data);
@@ -234,5 +244,23 @@ class C4B_Freeproduct_Model_Observer
         )));
 
         return $quoteItem;
+    }
+
+    /**
+     * @param $giftSku
+     * @return bool
+     */
+    protected static function _isValidGiftSku($giftSku)
+    {
+        if (trim($giftSku) === '') {
+            return false;
+        }
+        $skus = self::_getSkuList($giftSku);
+        foreach ($skus as $sku) {
+            if (! Mage::getModel('catalog/product')->getIdBySku($sku)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
