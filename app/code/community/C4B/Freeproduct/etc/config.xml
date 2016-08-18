@@ -2,7 +2,7 @@
 <config>
     <modules>
         <C4B_Freeproduct>
-            <version>0.1.0</version>
+            <version>1.1.0</version>
         </C4B_Freeproduct>
     </modules>
     <global>
@@ -45,7 +45,16 @@
                         <method>adminhtmlBlockSalesruleActionsPrepareform</method>
                     </freeproduct>
                 </observers>
-               </adminhtml_block_salesrule_actions_prepareform>
+            </adminhtml_block_salesrule_actions_prepareform>
+            <adminhtml_controller_salesrule_prepare_save>
+                <observers>
+                    <freeproduct>
+                        <type>model</type>
+                        <class>freeproduct/observer</class>
+                        <method>adminhtmlControllerSalesrulePrepareSave</method>
+                    </freeproduct>
+                </observers>
+            </adminhtml_controller_salesrule_prepare_save>
         </events>
         <translate>
             <modules>
@@ -75,7 +84,7 @@
                     </freeproduct>
                 </observers>
             </salesrule_validator_process>
-            <sales_quote_collect_totals_before>
+            <sales_quote_load_after>
                 <observers>
                     <freeproduct>
                         <type>model</type>
@@ -83,7 +92,7 @@
                         <method>salesQuoteCollectTotalsBefore</method>
                     </freeproduct>
                 </observers>
-            </sales_quote_collect_totals_before>
+            </sales_quote_load_after>
             <catalog_product_type_prepare_full_options>
                 <observers>
                     <freeproduct>
