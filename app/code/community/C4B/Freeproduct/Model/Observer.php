@@ -192,9 +192,10 @@ class C4B_Freeproduct_Model_Observer
             ));
         }
 
-        /** @var Mage_Catalog_Model_Product $productModel */
-        $productModel = Mage::getModel('catalog/product');
-        $product = $productModel->loadByAttribute('sku', $sku);
+        /** @var Mage_Catalog_Model_Product $product */
+        $product = Mage::getModel('catalog/product');
+        $product->setStoreId($storeId);
+        $product->load($product->getIdBySku($sku));
 
         if ($product == false) {
             throw new C4B_Freeproduct_Exception_ProductNotFound(sprintf(
