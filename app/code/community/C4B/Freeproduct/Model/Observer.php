@@ -15,6 +15,14 @@
  */
 class C4B_Freeproduct_Model_Observer
 {
+    /**
+     * @param $giftSku
+     * @return string[]
+     */
+    protected static function _getSkuList($giftSku)
+    {
+        return array_map('trim', explode(',', $giftSku));
+    }
 
     /**
      * Delete all free products that have been added through this module before.
@@ -81,22 +89,18 @@ class C4B_Freeproduct_Model_Observer
             return;
         }
 
-        /** @var Mage_Sales_Model_Quote_Item $freeItem */
-        $freeItem = static::_getFreeQuoteItem($quote, $rule->getGiftSku(), $item->getStoreId(), (int)$rule->getDiscountAmount());
-        if ($freeItem)
-        {
-            $quote->addItem($freeItem);
-            $freeItem->setApplyingRule($rule);
-            $rule->setIsApplied(true);
-        }
-        else
-        {
-            Mage::log(
-                sprintf(
-                    'C4B_Freeproduct: Gift product not saleable. Rule ID: %d, Gift SKU: %s, Store ID: %d',
-                    $rule->getId(), $rule->getGiftSku(), $quote->getStoreId()
-                ), Zend_Log::ERR
-            );
+        try {
+            $qty = (int)$rule->getDiscountAmount();
+            $skus = static::_getSkuList($rule->getGiftSku());
+            foreach ($skus as $sku) {
+                /** @var Mage_Sales_Model_Quote_Item $freeItem */
+                $freeItem = static::_getFreeQuoteItem($rule->getId(), $sku, $item->getStoreId(), $qty);
+                $quote->addItem($freeItem);
+                $freeItem->setApplyingRule($rule);
+            }
+            $rule->setData('is_applied', true);
+        } catch (RuntimeException $e) {
+            Mage::logException($e);
         }
     }
 
@@ -123,7 +127,7 @@ class C4B_Freeproduct_Model_Observer
             'name' => 'gift_sku',
             'label' => Mage::helper('freeproduct')->__('Gift SKU'),
             'title' => Mage::helper('freeproduct')->__('Gift SKU'),
-            'note' => Mage::helper('freeproduct')->__('Enter the SKU of the gift that should be added to the cart'),
+            'note' => Mage::helper('freeproduct')->__('Enter the SKU of the gift that should be added to the cart. You can enter a comma separated list for multiple gifts.'),
         ));
     }
 
@@ -139,7 +143,7 @@ class C4B_Freeproduct_Model_Observer
         $request = $observer->getRequest();
         if ($request->getParam('simple_action') == C4B_Freeproduct_Model_Consts::ADD_GIFT_ACTION) {
             $giftSku = $request->getParam('gift_sku');
-            if (empty($giftSku) || Mage::getModel('catalog/product')->getIdBySku($giftSku) == false) {
+            if (! static::_isValidGiftSku($giftSku)) {
                 // make sure that unsaved data is not lost
                 $data = $request->getPost();
                 Mage::getSingleton('adminhtml/session')->setPageData($data);
@@ -170,9 +174,9 @@ class C4B_Freeproduct_Model_Observer
      */
     public function salesQuoteProductAddAfter(Varien_Event_Observer $observer)
     {
-    	foreach ($observer->getEvent()->getItems() as $quoteItem) {
-    		$quoteItem->setIsFreeProduct($quoteItem->getProduct()->getIsFreeProduct());
-    	}
+        foreach ($observer->getEvent()->getItems() as $quoteItem) {
+            $quoteItem->setIsFreeProduct($quoteItem->getProduct()->getIsFreeProduct());
+        }
     }
 
     /**
@@ -180,39 +184,53 @@ class C4B_Freeproduct_Model_Observer
      * originally. The flag is_free_product gets saved in the buy request to read it on
      * reordering, because fieldset conversion does not work from order item to quote item.
      *
-     * @param Mage_Sales_Model_Quote $quote
+     * @param int $ruleId
      * @param string $sku
      * @param int $storeId
      * @param int $qty
-     * @return Mage_Sales_Model_Quote_Item|bool
+     * @return bool|Mage_Sales_Model_Quote_Item
+     * @throws C4B_Freeproduct_Exception_InvalidQuantity
+     * @throws C4B_Freeproduct_Exception_ProductNotSalable
+     * @throws C4B_Freeproduct_Exception_ProductNotFound
      */
-    protected static function _getFreeQuoteItem(Mage_Sales_Model_Quote $quote, $sku, $storeId, $qty)
+    protected static function _getFreeQuoteItem($ruleId, $sku, $storeId, $qty)
     {
         if ($qty < 1) {
-            return false;
+            throw new C4B_Freeproduct_Exception_InvalidQuantity(sprintf(
+                'C4B_Freeproduct: Invalid Gift product qty. Rule ID: %d, Gift Qty: %d',
+                $ruleId, $qty
+            ));
         }
 
         /** @var Mage_Catalog_Model_Product $product */
-        $product = Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
+        $product = Mage::getModel('catalog/product');
+        $product->setStoreId($storeId);
+        $product->load($product->getIdBySku($sku));
 
         if ($product == false) {
-            return false;
+            throw new C4B_Freeproduct_Exception_ProductNotFound(sprintf(
+                'C4B_Freeproduct: Gift product not found. Rule ID: %d, Gift SKU: %s, Store ID: %d',
+                $ruleId, $sku, $storeId
+            ));
         }
 
         Mage::getModel('cataloginventory/stock_item')->assignProduct($product);
 
         if ($product->isSalable() == false) {
-            return false;
+            throw new C4B_Freeproduct_Exception_ProductNotSalable(sprintf(
+                'C4B_Freeproduct: Gift product not saleable. Rule ID: %d, Gift SKU: %s, Store ID: %d',
+                $ruleId, $sku, $storeId
+            ));
         }
 
         $quoteItem = Mage::getModel('sales/quote_item')->setProduct($product);
-        $quoteItem->setQuote($quote)
-                ->setQty($qty)
-                ->setCustomPrice(0.0)
-                ->setOriginalCustomPrice($product->getPrice())
-                ->setIsFreeProduct(true)
-                ->setWeeeTaxApplied('a:0:{}') // Set WeeTaxApplied Value by default so there are no "warnings" later on during invoice creation
-                ->setStoreId($storeId);
+        $quoteItem
+            ->setQty($qty)
+            ->setCustomPrice(0.0)
+            ->setOriginalCustomPrice($product->getPrice())
+            ->setIsFreeProduct(true)
+            ->setWeeeTaxApplied('a:0:{}') // Set WeeTaxApplied Value by default so there are no "warnings" later on during invoice creation
+            ->setStoreId($storeId);
         $quoteItem->addOption(new Varien_Object(array(
             'product' => $product,
             'code' => 'info_buyRequest',
@@ -224,7 +242,25 @@ class C4B_Freeproduct_Model_Observer
             'code' => 'freeproduct_uniqid',
             'value' => uniqid(null, true)
         )));
-        
+
         return $quoteItem;
+    }
+
+    /**
+     * @param $giftSku
+     * @return bool
+     */
+    protected static function _isValidGiftSku($giftSku)
+    {
+        if (trim($giftSku) === '') {
+            return false;
+        }
+        $skus = self::_getSkuList($giftSku);
+        foreach ($skus as $sku) {
+            if (! Mage::getModel('catalog/product')->getIdBySku($sku)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
