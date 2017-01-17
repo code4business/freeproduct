@@ -26,7 +26,9 @@
 ?>
 <?php
 $_item = $this->getItem();
-$isVisibleProduct = $_item->getProduct()->isVisibleInSiteVisibility();
+// BEGIN CHANGE C4B_Freeproduct: Set gift items to not visible, so edit and wishlist are hidden
+$isVisibleProduct = $_item->getProduct()->isVisibleInSiteVisibility() && $_item->getIsFreeProduct() == false;
+// END CHANGE C4B_Freeproduct
 $canApplyMsrp = Mage::helper('catalog')->canApplyMsrp($_item->getProduct(), Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type::TYPE_BEFORE_ORDER_CONFIRM);
 ?>
 <tr>
@@ -178,12 +180,13 @@ $canApplyMsrp = Mage::helper('catalog')->canApplyMsrp($_item->getProduct(), Mage
         <?php endif; ?>
     <?php endif; ?>
     <td class="a-center">
-        <?php // THE NEXT 5 LINES ARE CHANGED BY C4B FOR FREEPRODUCT: The qty of Freeproducts is not editable ?>
+        <?php // BEGIN CHANGE C4B_Freeproduct: The qty of gift items is not editable ?>
         <?php if ($_item->getIsFreeProduct()) : ?>
             <?php echo $this->getQty() ?>
         <?php else: ?>
             <input name="cart[<?php echo $_item->getId() ?>][qty]" value="<?php echo $this->getQty() ?>" size="4" title="<?php echo $this->__('Qty') ?>" class="input-text qty" maxlength="12" />
         <?php endif; ?>
+        <?php // END CHANGE C4B_Freeproduct ?>
     </td>
     <?php if ($this->helper('tax')->displayCartPriceExclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
     <td class="a-right">
@@ -278,10 +281,11 @@ $canApplyMsrp = Mage::helper('catalog')->canApplyMsrp($_item->getProduct(), Mage
         <?php endif; ?>
     </td>
     <?php endif; ?>
-    <?php // THE NEXT 5 LINES ARE CHANGED BY C4B FOR FREEPRODUCT: Freeproducts are not deletable ?>
+    <?php // BEGIN CHANGE C4B_Freeproduct: Gift items are not deletable ?>
     <td class="a-center">
         <?php if (!$_item->getIsFreeProduct()) : ?>    
             <a href="<?php echo $this->getDeleteUrl()?>" title="<?php echo $this->__('Remove item')?>" class="btn-remove btn-remove2"><?php echo $this->__('Remove item')?></a>
         <?php endif; ?>        
     </td>
+    <?php // END CHANGE C4B_Freeproduct ?>
 </tr>
