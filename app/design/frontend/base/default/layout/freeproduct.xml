@@ -7,17 +7,11 @@
                 <block>checkout/cart_item_renderer</block>
                 <template>freeproduct/checkout/cart/item/default.phtml</template>
             </action>
-            <!-- As long as you do not use grouped or configurable gifts, the next two
-                 actions are not necessary -->
             <action method="addItemRender">
-                <type>grouped</type>
-                <block>checkout/cart_item_renderer_grouped</block>
+                <type>virtual</type>
+                <block>checkout/cart_item_renderer</block>
                 <template>freeproduct/checkout/cart/item/default.phtml</template>
             </action>
-            <action method="addItemRender">
-                <type>configurable</type>
-                <block>checkout/cart_item_renderer_configurable</block>
-            <template>freeproduct/checkout/cart/item/default.phtml</template></action>
         </reference>
     </checkout_cart_index>
 </layout>
