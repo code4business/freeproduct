@@ -6,7 +6,7 @@ This extensions allows you to add gifts to your cart. To do allow this, a new ac
 - http://www.webguys.de/magento/turchen-21-kostenlose-produkte-uber-warenkorb-preisregeln/
 
 # Supported Product Types
-The extension only supports simple and virtual product types, other types or custom options are not supported.  
+The extension only supports simple and virtual product types, other types or custom options are not supported. The reason is that other product types need additional information that can only be added with IDs. This leads to a way more complicated module; we want to keep this module clean and easy.
 
 # Contribution
 
@@ -17,9 +17,6 @@ I am very happy for people contributing with pull requests. If possible stick to
 - Do not duplicate code; so if you copy code from one place to another you are probably doing something wrong
 - Only use comments inside methods if the code is really hard to understand and you cannot make it easier; please comment the methods however
 - Use sentences for your commit-messages that start with a verb in past tense and end with a dot, e.g. "Add modman file."
-
-Current limitations:
-- ksbomj found the problem that you cannot use bundles as gifts; again I am happy about further contributions
 
 Current localizations:
 - de_DE
