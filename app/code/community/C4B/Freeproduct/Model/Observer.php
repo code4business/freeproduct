@@ -15,6 +15,7 @@
  */
 class C4B_Freeproduct_Model_Observer
 {
+
     /**
      * @param $giftSku
      * @return string[]
@@ -96,6 +97,7 @@ class C4B_Freeproduct_Model_Observer
                 /** @var Mage_Sales_Model_Quote_Item $freeItem */
                 $freeItem = static::_getFreeQuoteItem($rule->getId(), $sku, $item->getStoreId(), $qty);
                 $quote->addItem($freeItem);
+                static::_setQuoteItemTaxPercent($freeItem);
                 $freeItem->setApplyingRule($rule);
             }
             $rule->setData('is_applied', true);
@@ -231,6 +233,7 @@ class C4B_Freeproduct_Model_Observer
             ->setIsFreeProduct(true)
             ->setWeeeTaxApplied('a:0:{}') // Set WeeTaxApplied Value by default so there are no "warnings" later on during invoice creation
             ->setStoreId($storeId);
+
         $quoteItem->addOption(new Varien_Object(array(
             'product' => $product,
             'code' => 'info_buyRequest',
@@ -244,6 +247,27 @@ class C4B_Freeproduct_Model_Observer
         )));
 
         return $quoteItem;
+    }
+
+    /**
+     * @param $storeId
+     * @param $quoteItem
+     */
+    protected static function _setQuoteItemTaxPercent(Mage_Sales_Model_Quote_Item $quoteItem)
+    {
+        $taxCalculationModel = Mage::getSingleton('tax/calculation');
+        $quote = $quoteItem->getQuote();
+        /* @var $taxCalculationModel Mage_Tax_Model_Calculation */
+        $request = $taxCalculationModel->getRateRequest(
+            $quote->getShippingAddress(),
+            $quote->getBillingAddress(),
+            $quote->getCustomerTaxClassId(),
+            $quoteItem->getStore()
+        );
+        $rate = $taxCalculationModel->getRate(
+            $request->setProductClassId($quoteItem->getProduct()->getTaxClassId())
+        );
+        $quoteItem->setTaxPercent($rate);
     }
 
     /**
