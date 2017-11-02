@@ -95,7 +95,7 @@ class C4B_Freeproduct_Model_Observer
             $skus = static::_getSkuList($rule->getGiftSku());
             foreach ($skus as $sku) {
                 /** @var Mage_Sales_Model_Quote_Item $freeItem */
-                $freeItem = static::_getFreeQuoteItem($rule->getId(), $sku, $item->getStoreId(), $qty);
+                $freeItem = static::_getFreeQuoteItem($rule->getId(), $sku, $quote->getStoreId(), $qty);
                 $quote->addItem($freeItem);
                 static::_setQuoteItemTaxPercent($freeItem);
                 $freeItem->setApplyingRule($rule);
