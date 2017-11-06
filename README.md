@@ -18,7 +18,10 @@ I am very happy for people contributing with pull requests. If possible stick to
 - Only use comments inside methods if the code is really hard to understand and you cannot make it easier; please comment the methods however
 - Use sentences for your commit-messages that start with a verb in past tense and end with a dot, e.g. "Add modman file."
 
-Current localizations:
+# Magento 2
+You can find the Magento 2.x version [here](https://github.com/code4business/freeproduct2).
+
+# Current localizations:
 - de_DE
 - es_ES
 - fr_FR
